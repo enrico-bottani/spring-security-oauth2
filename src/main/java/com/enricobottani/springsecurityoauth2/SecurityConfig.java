@@ -20,13 +20,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 )
                 .authorizeRequests(a -> a
-                        .antMatchers("/", "/error", "/webjars/**","/js/*").permitAll()
+                        .antMatchers("/", "/error", "/webjars/**", "/js/*").permitAll()
                         .anyRequest().authenticated()
                 )
                 .logout(l -> l
                         .logoutSuccessUrl("/").permitAll()
                 )
                 .exceptionHandling(e -> e
+                        //configure endpoints to respond with a 401 instead of the default behavior of
+                        // redirecting to a login page.
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
                 )
                 .oauth2Login();
