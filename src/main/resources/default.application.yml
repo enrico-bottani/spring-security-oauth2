@@ -1,0 +1,9 @@
+#REMOVE 'default.' + update you github & google keys
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: <your_clientId>
+            clientSecret: <your_clientSecret>
