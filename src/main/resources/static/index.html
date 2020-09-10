@@ -20,21 +20,18 @@
     </div>
 </div>
 
-<script type="text/javascript" src="./js/jquery-3.5.1.min.js"></script>
 <script type="text/javascript" src="./js/js.cookie-2.2.1.min.js"></script>
 
 <script type="text/javascript">
-    function post(url) {
+
+    function post(url, callback) {
         let xmlHttp = new XMLHttpRequest();
         xmlHttp.onreadystatechange = function () {
             if (xmlHttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
                 if (xmlHttp.status == 200) {
-
-                    document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
+                    callback(xmlHttp.response);
                 } else if (xmlHttp.status == 400) {
-                    alert('There was an error 400');
                 } else {
-                    alert('something else other than 200 was returned');
                 }
             }
         };
@@ -43,33 +40,55 @@
         xmlHttp.send();
     }
 
-    $.get("/user", function (data) {
-        $("#user").html(data.name);
-        $(".unauthenticated").hide()
-        $(".authenticated").show()
-    });
-    var logout = function () {
-        // the '/logout' call will trigger the cookies invalidation in Spring
-        post("/logout");
-        /*$.post("/logout", function () {
-            $("#user").html('');
-            $(".unauthenticated").show();
-            $(".authenticated").hide();
-        })*/
-        return true;
-    }
-    $.ajaxSetup({
-        beforeSend: function (xhr, settings) {
-            if (settings.type == 'POST' || settings.type == 'PUT' || settings.type == 'DELETE') {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/
-                    .test(settings.url))) {
-                    // Only send the token to relative URLs i.e. locally.
-                    xhr.setRequestHeader("X-XSRF-TOKEN",
-                        Cookies.get('XSRF-TOKEN'));
+    function get(url, callback) {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+                if (xmlHttp.status == 200) {
+                    callback(xmlHttp.response);
+                } else if (xmlHttp.status == 400) {
+                } else {
                 }
             }
-        }
-    });
+        };
+        xmlHttp.open("GET", url, true);
+        xmlHttp.send();
+    }
+
+    function loginSucceeded(response) {
+        document.querySelector("#user").innerHTML = JSON.parse(response).name;
+        document.querySelectorAll(".unauthenticated").forEach(
+            function (item) {
+                item.style.display = 'none';
+            }
+        )
+        document.querySelectorAll(".authenticated").forEach(
+            function (item) {
+                item.style.display = 'block';
+            }
+        )
+    }
+
+    function logoutSucceeded() {
+        document.querySelector("#user").innerHTML = "";
+        document.querySelectorAll(".unauthenticated").forEach(
+            function (item) {
+                item.style.display = 'block';
+            }
+        )
+        document.querySelectorAll(".authenticated").forEach(
+            function (item) {
+                item.style.display = 'none';
+            }
+        )
+    }
+
+    var logout = function () {
+        // the '/logout' call will trigger the cookies invalidation in Spring
+        post("/logout", logoutSucceeded);
+        return true;
+    }
+    get("/user", loginSucceeded);
 </script>
 
 <a href="https://spring.io/guides/tutorials/spring-boot-oauth2/#github-register-application">https://spring.io/guides/tutorials/spring-boot-oauth2/#github-register-application</a>
