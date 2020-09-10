@@ -24,22 +24,42 @@
 <script type="text/javascript" src="./js/js.cookie-2.2.1.min.js"></script>
 
 <script type="text/javascript">
-    $.get("/user", function(data) {
+    function post(url) {
+        let xmlHttp = new XMLHttpRequest();
+        xmlHttp.onreadystatechange = function () {
+            if (xmlHttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+                if (xmlHttp.status == 200) {
+
+                    document.getElementById("myDiv").innerHTML = xmlhttp.responseText;
+                } else if (xmlHttp.status == 400) {
+                    alert('There was an error 400');
+                } else {
+                    alert('something else other than 200 was returned');
+                }
+            }
+        };
+        xmlHttp.open("POST", url, true);
+        xmlHttp.setRequestHeader("X-XSRF-TOKEN", Cookies.get('XSRF-TOKEN'))
+        xmlHttp.send();
+    }
+
+    $.get("/user", function (data) {
         $("#user").html(data.name);
         $(".unauthenticated").hide()
         $(".authenticated").show()
     });
-    var logout = function() {
+    var logout = function () {
         // the '/logout' call will trigger the cookies invalidation in Spring
-        $.post("/logout", function() {
+        post("/logout");
+        /*$.post("/logout", function () {
             $("#user").html('');
             $(".unauthenticated").show();
             $(".authenticated").hide();
-        })
+        })*/
         return true;
     }
     $.ajaxSetup({
-        beforeSend : function(xhr, settings) {
+        beforeSend: function (xhr, settings) {
             if (settings.type == 'POST' || settings.type == 'PUT' || settings.type == 'DELETE') {
                 if (!(/^http:.*/.test(settings.url) || /^https:.*/
                     .test(settings.url))) {
